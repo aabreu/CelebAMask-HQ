@@ -57,7 +57,7 @@ class conv2DGroupNorm(nn.Module):
                              bias=bias,
                              dilation=dilation,)
 
-        self.cg_unit = nn.Sequential(conv_mod, 
+        self.cg_unit = nn.Sequential(conv_mod,
                                      nn.GroupNorm(n_groups, int(n_filters)))
 
     def forward(self, inputs):
@@ -109,8 +109,8 @@ class conv2DBatchNormRelu(nn.Module):
                              dilation=dilation,)
 
         if is_batchnorm:
-            self.cbr_unit = nn.Sequential(conv_mod, 
-                                          nn.BatchNorm2d(int(n_filters)), 
+            self.cbr_unit = nn.Sequential(conv_mod,
+                                          nn.BatchNorm2d(int(n_filters)),
                                           nn.ReLU(inplace=True))
         else:
             self.cbr_unit = nn.Sequential(conv_mod, nn.ReLU(inplace=True))
@@ -142,8 +142,8 @@ class conv2DGroupNormRelu(nn.Module):
                              bias=bias,
                              dilation=dilation,)
 
-        self.cgr_unit = nn.Sequential(conv_mod, 
-                                      nn.GroupNorm(n_groups, int(n_filters)), 
+        self.cgr_unit = nn.Sequential(conv_mod,
+                                      nn.GroupNorm(n_groups, int(n_filters)),
                                       nn.ReLU(inplace=True))
 
     def forward(self, inputs):
@@ -215,9 +215,9 @@ class unetUp(nn.Module):
     def forward(self, inputs1, inputs2):
         outputs2 = self.up(inputs2)
         offset = outputs2.size()[2] - inputs1.size()[2]
-        padding = 2 * [offset // 2, offset // 2]           
+        padding = 2 * [offset // 2, offset // 2]
         outputs1 = F.pad(inputs1, padding)
-               
+
         return self.conv(torch.cat([outputs1, outputs2], 1))
 
 
@@ -374,10 +374,10 @@ class FRRU(nn.Module):
     Full Resolution Residual Unit for FRRN
     """
 
-    def __init__(self, 
-                 prev_channels, 
-                 out_channels, 
-                 scale, 
+    def __init__(self,
+                 prev_channels,
+                 out_channels,
+                 scale,
                  group_norm=False,
                  n_groups=None):
         super(FRRU, self).__init__()
@@ -391,19 +391,19 @@ class FRRU(nn.Module):
         if self.group_norm:
             conv_unit = conv2DGroupNormRelu
             self.conv1 = conv_unit(
-                prev_channels + 32, out_channels, k_size=3, 
+                prev_channels + 32, out_channels, k_size=3,
                 stride=1, padding=1, bias=False, n_groups=self.n_groups
             )
             self.conv2 = conv_unit(
-                out_channels, out_channels, k_size=3, 
+                out_channels, out_channels, k_size=3,
                 stride=1, padding=1, bias=False, n_groups=self.n_groups
             )
 
         else:
             conv_unit = conv2DBatchNormRelu
-            self.conv1 = conv_unit(prev_channels + 32, out_channels, k_size=3, 
+            self.conv1 = conv_unit(prev_channels + 32, out_channels, k_size=3,
                                    stride=1, padding=1, bias=False,)
-            self.conv2 = conv_unit(out_channels, out_channels, k_size=3, 
+            self.conv2 = conv_unit(out_channels, out_channels, k_size=3,
                                    stride=1, padding=1, bias=False,)
 
         self.conv_res = nn.Conv2d(out_channels, 32, kernel_size=1, stride=1, padding=0)
@@ -426,10 +426,10 @@ class RU(nn.Module):
     Residual Unit for FRRN
     """
 
-    def __init__(self, 
-                 channels, 
-                 kernel_size=3, 
-                 strides=1, 
+    def __init__(self,
+                 channels,
+                 kernel_size=3,
+                 strides=1,
                  group_norm=False,
                  n_groups=None):
         super(RU, self).__init__()
@@ -438,10 +438,10 @@ class RU(nn.Module):
 
         if self.group_norm:
             self.conv1 = conv2DGroupNormRelu(
-               channels, channels, k_size=kernel_size, 
+               channels, channels, k_size=kernel_size,
                stride=strides, padding=1, bias=False,n_groups=self.n_groups)
             self.conv2 = conv2DGroupNorm(
-                channels, channels, k_size=kernel_size, 
+                channels, channels, k_size=kernel_size,
                 stride=strides, padding=1, bias=False,n_groups=self.n_groups)
 
         else:
